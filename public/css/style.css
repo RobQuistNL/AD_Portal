@@ -1,0 +1,9 @@
+.serial {
+	font-size: 0.7em;
+	display: block;
+	margin: 5px 0;
+}
+
+.serial dt, .serial dd {
+	line-height: 1.4em;
+}
