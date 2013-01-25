@@ -1,27 +1,38 @@
 <?php
 
 /**
- * VPN Portal (http://www.enrise.com/)
+ * AD Password Portal (http://www.enrise.com/)
  *
- * @link      http://github.com/enrise/VPN for the canonical source repository
- * @copyright Copyright (c) 2012 Enrise BV.
+ * @link      http://github.com/RobQuistNL/AD_Portal for the canonical source repository
+ * @copyright Copyright (c) 2013 Enrise BV.
  * @license   FreeBSD <LICENSE.MD>
 **/
 /* Start session */
 session_start();
 
-/* DEBUG DATA */
-//error_reporting(-1);
-//ini_set('display_errors', 1);
-
-/* Include Config */
-require "inc/config.inc.php";
-
 /* Include ZF2 */
 require "inc/embed_zf2.inc.php";
 
-/* Database handler */
-require "inc/sqlite.inc.php";
+/* Load in the config ini using the ZF2 ini config reader */
+$configFile = realpath(__DIR__ . '/../config/application.ini');
+if (is_file($configFile)) {
+	require realpath(__DIR__ . '/../vendor/zf2/library/Zend/Config/Reader/Ini.php');
+	$GLOBALS['config'] = new Zend\Config\Reader\Ini();
+	$GLOBALS['config'] = $config->fromFile($configFile);
+} else {
+	$GLOBALS['config'] = array();
+}
+
+if (true === (bool)$GLOBALS['config']['debug']) {
+	error_reporting(-1);
+	ini_set('display_errors', 1);
+}
+
+foreach ($GLOBALS['config']['ad_servers'] as $ad_server) {
+	//var_dump($ad_server['host']);
+	$ad_server['useStartTls'] = (bool)$ad_server['useStartTls'];
+	//var_dump($ad_server['useStartTls']);
+}
 
 /* Include the most simplistic templateparser & languageparser & bootstrap generator */
 require "inc/templateParser.inc.php";
@@ -39,23 +50,6 @@ $BS = new BootStrapper();
 $lang = new LanguageParser();
 $TP = new SimpleTemplateParser();
 $TP->setTemplate('base_template.phtml');
-$DB = new DB;
-
-// The config
-
-if (is_file(CONFIG_FILE)) {
-    require APP_PATH . '/vendor/zf2/library/Zend/Config/Reader/Ini.php';
-    $config = new Zend\Config\Reader\Ini();
-    $config = $config->fromFile(CONFIG_FILE);
-} else {
-    $config = array();
-}
-
-/*
-***************************** TO INSTALL, RUN THESE 2 LINES.
-*/
-//$DB->install();
-//die;
 
 
 switch ($page) {

@@ -32,14 +32,14 @@ class SimpleTemplateParser
         /* Add some default values to be parsed. Can be edited for lateron */
         $this->parsevars = array(
                                 'CONTENT'   => $this->content,
-                                'TITLE'     => $this->title,
+                                'TITLE'     => $GLOBALS['config']['project_title'] . ' - ' . $this->title,
                                 );
     }
 
     /**
      * Set the template file.
      *
-     * @param string $file   <Absolute filename + path to template>
+     * @param string $file   <filename in template path or absolute path>
      */
     public function setTemplate($file)
     {
@@ -87,6 +87,31 @@ class SimpleTemplateParser
     }
 
     /**
+     * Add a variable to the template engine
+     *
+     * @param string $key
+     * @param multi $value
+     * @return SimpleTemplateParser this
+     */
+    public function setParsevar($key, $value)
+    {
+    	$this->parsevars[$key] = $value;
+    	return $this;
+    }
+    
+    /**
+     * Clear a variable
+     *
+     * @param string $key
+     * @return SimpleTemplateParser this
+     */
+    public function clearParsevar($key)
+    {
+    	if (array_key_exists($key, $this->parsevars)) unset($this->parsevars[$key]);
+    	return $this;
+    }
+    
+    /**
      * Parser function loads in the template file, and replaces all
      * placeholders in the file (e.g. {{PLACEHOLDER}} ) with the
      * assigned values in the $parsevars array. "PLACEHOLDER" in the array
@@ -97,31 +122,27 @@ class SimpleTemplateParser
         if ($this->templateFile=='') {
             throw new Exception('No template file selected.');
         }
-
-        if (!file_exists($this->templateFile)) {
-            if (!file_exists(PUBLIC_PATH . '/view/' . $this->templateFile)) {
-                throw new Exception('Template file ' . $this->templateFile . ' not found in ' . getcwd() . ' or ' . PUBLIC_PATH . '/view/');
-            } else {
-                $this->output = file_get_contents(PUBLIC_PATH . '/view/' . $this->templateFile);
-            }
-        } else {
-            $this->output = file_get_contents($this->templateFile);
-        }
-
+		
+        //Check if it exists in template folder or absolute
+		if (!file_exists($this->templateFile)) {
+        	$templateFilePath = $GLOBALS['config']['app_root'] . $GLOBALS['config']['template_folder'] . '/' . $this->templateFile;
+		} else {
+			$templateFilePath = $this->templateFile;
+		}
+		
+		if (!file_exists($templateFilePath)) {
+			throw new Exception('Template file ' . $templateFilePath . ' not found.');
+		}
+		
+		$this->output = file_get_contents($templateFilePath);
+        
         $this->initParseVars();
-        /**
-         * This is quick, and dirty. Aware of that fact. Works for now.
-         * @todo Make a flexible variable parsing system.
-         */
-        if (isset($_SESSION['username'])) {
-            $this->parsevars['LOGOUTBUTTON'] = '<li><a href="logout.html">Log out</a></li>';
-        } else {
-            $this->parsevars['LOGOUTBUTTON'] = '';
-        }
 
         foreach ($this->parsevars as $key => $value) {
             $this->output = str_replace('{{' . $key . '}}', $value, $this->output);
         }
+        
+        $this->isParsed = true;
 
     }
 
@@ -139,31 +160,6 @@ class SimpleTemplateParser
         }
 
         return $this->output;
-    }
-
-    /**
-     * Add a variable to the template engine
-     *
-     * @param string $key
-     * @param multi $value
-     * @return SimpleTemplateParser this
-     */
-    public function setParsevar($key, $value)
-    {
-        $this->parsevars[$key] = $value;
-        return $this;
-    }
-
-    /**
-     * Clear a variable
-     *
-     * @param string $key
-     * @return SimpleTemplateParser this
-     */
-    public function clearParsevar($key)
-    {
-        if (array_key_exists($key, $this->parsevars)) unset($this->parsevars[$key]);
-        return $this;
     }
 
 }

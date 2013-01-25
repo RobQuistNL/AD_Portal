@@ -1,7 +1,21 @@
-serials.windows.username = changeme
-serials.windows.email = changeme
-serials.windows.key = changeme
+;Servers
+ad_servers.0.host			= 'test'
+ad_servers.0.useStartTls	= 0
+ad_servers.0.domain			= 'ad-domain.example.org'
+ad_servers.0.baseDn			= 'DC=ad-domain,DC=example,DC=org'
 
-serials.osx.username = changeme
-serials.osx.email = changeme
-serials.osx.key = changeme
+ad_servers.1.host			= 'test2'
+ad_servers.1.useStartTls	= 1
+ad_servers.1.domain			= 'ad-domain.example.org'
+ad_servers.1.baseDn			= 'DC=ad-domain,DC=example,DC=org'
+
+;Application settings
+debug			= 1
+language		= 'en-us'
+project_title	= 'AD Password Portal'
+
+;Paths - NO trailing slashes
+app_root		= '/srv/http/ad_portal.dev'
+public_folder	= '/public'
+language_folder	= '/lang'
+template_folder	= '/templates'

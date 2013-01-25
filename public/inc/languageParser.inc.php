@@ -12,16 +12,16 @@ class LanguageParser
     private $text_array = array();
     
     /* 
-     * Constructor function. Loads in the language file, set in config.inc.php.
+     * Constructor function. Loads in the language file, set in config.ini
      */
     public function __construct() 
     {
-        $langfile=LANG_FILE;
+        $langfile = $GLOBALS['config']['app_root'] . $GLOBALS['config']['language_folder'] . '/' . $GLOBALS['config']['language'] . '.php';
         if (!file_exists($langfile)) {
-            throw new Exception('Language file does not exist. Change language file in configfile!');
+            throw new Exception('Language file (' . $langfile . ') does not exist. Change language file in config!');
         }
         
-        require LANG_FILE;
+        require $langfile;
     }
     
     /**
